@@ -19,7 +19,7 @@ body {
     padding: 20px;
     border-radius: 15px;
     display: inline-block;
-    width: 320px;
+    width: 350px;
 }
 
 button {
@@ -76,13 +76,14 @@ input {
 <script>
 
 let preguntas=[], i=0, score=0, categoria="";
-let perfil={};
 
+// =========================
 function menu(){
     document.getElementById("inicio").style.display="none";
     document.getElementById("menu").style.display="block";
 }
 
+// =========================
 function iniciar(cat){
     categoria=cat;
     preguntas=[]; i=0; score=0;
@@ -95,6 +96,7 @@ function iniciar(cat){
     mostrar();
 }
 
+// =========================
 function generarPreguntas(){
     let usadas=new Set();
 
@@ -102,7 +104,7 @@ function generarPreguntas(){
 
         let texto, opciones, correcta, explicacion;
 
-        // ARITMÉTICA
+        // ===== ARITMÉTICA =====
         if(categoria=="arit"){
             let tipo=["+","-","*","/"][rand(0,3)];
             let a,b,r;
@@ -115,35 +117,44 @@ function generarPreguntas(){
             texto=`${a} ${tipo} ${b}`;
             correcta=r;
             explicacion="Operación básica";
+
+            opciones=[
+                r,
+                r+rand(1,5),
+                r-rand(1,5)
+            ];
         }
 
-        // ÁLGEBRA
-        if(categoria=="alg"){
+        // ===== ÁLGEBRA =====
+        else if(categoria=="alg"){
             let x=rand(1,20), b=rand(1,20);
             let r=x+b;
+
             texto=`x + ${b} = ${r}`;
             correcta=x;
             explicacion=`x = ${r} - ${b}`;
+
+            opciones=[x, x+1, x-1];
         }
 
-        // GEOMETRÍA
-        if(categoria=="geo"){
-            texto="Lados de un triángulo?";
+        // ===== GEOMETRÍA =====
+        else if(categoria=="geo"){
+            texto="¿Cuántos lados tiene un triángulo?";
             correcta="3";
             opciones=["3","4","5"];
             explicacion="Un triángulo tiene 3 lados";
         }
 
-        // COMPUTACIÓN
-        if(categoria=="comp"){
+        // ===== COMPUTACIÓN =====
+        else if(categoria=="comp"){
             texto="¿Qué es Python?";
             correcta="Lenguaje";
             opciones=["Lenguaje","Hardware","Red"];
-            explicacion="Python es lenguaje de programación";
+            explicacion="Python es un lenguaje de programación";
         }
 
-        // INGLÉS
-        if(categoria=="eng"){
+        // ===== INGLÉS =====
+        else if(categoria=="eng"){
             texto="Hello significa:";
             correcta="Hola";
             opciones=["Hola","Adiós","Gracias"];
@@ -153,18 +164,13 @@ function generarPreguntas(){
         if(usadas.has(texto)) continue;
         usadas.add(texto);
 
-        if(!opciones){
-            opciones=[
-                correcta,
-                correcta+1,
-                correcta-1
-            ].sort(()=>Math.random()-0.5);
-        }
+        opciones = opciones.sort(()=>Math.random()-0.5);
 
         preguntas.push({texto,opciones,correcta,explicacion});
     }
 }
 
+// =========================
 function mostrar(){
     let p=preguntas[i];
     document.getElementById("pregunta").innerText=p.texto;
@@ -180,6 +186,7 @@ function mostrar(){
     });
 }
 
+// =========================
 function verificar(op){
     let p=preguntas[i];
 
@@ -195,6 +202,7 @@ function verificar(op){
     else finalizar();
 }
 
+// =========================
 function finalizar(){
     document.getElementById("quiz").style.display="none";
     document.getElementById("resultado").style.display="block";
@@ -206,6 +214,7 @@ function finalizar(){
         `${porcentaje.toFixed(1)}% - ${estado}`;
 }
 
+// =========================
 function rand(min,max){
     return Math.floor(Math.random()*(max-min+1))+min;
 }
