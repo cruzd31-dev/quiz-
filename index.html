@@ -2,26 +2,23 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Quiz PRO</title>
+<title>Quiz PRO MAX</title>
 
 <style>
 body {
-    background: #1e1e2f;
+    background: linear-gradient(135deg, #1e1e2f, #2a2a40);
     font-family: Arial;
     color: white;
     text-align: center;
 }
-
-.container { margin-top: 40px; }
-
 .card {
     background: #2a2a40;
     padding: 20px;
     border-radius: 15px;
     display: inline-block;
-    width: 350px;
+    width: 380px;
+    margin-top: 40px;
 }
-
 button {
     padding: 10px;
     margin: 5px;
@@ -31,241 +28,263 @@ button {
     color: white;
     cursor: pointer;
 }
-
 button:hover { background: #45a049; }
-
-input {
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-}
+.progress { background:#444; height:10px; border-radius:10px; }
+.progress-bar { height:10px; background:#4CAF50; width:0%; border-radius:10px;}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="card">
 
-<div id="inicio" class="card">
-    <h2>🎮 Quiz PRO</h2>
-    <input id="nombre" placeholder="Tu nombre"><br><br>
-    <button onclick="menu()">Continuar</button>
+<h2>🎮 Quiz PRO MAX</h2>
+
+<div id="inicio">
+<input id="nombre" placeholder="Tu nombre"><br><br>
+<button onclick="startUser()">Comenzar</button>
 </div>
 
-<div id="menu" class="card" style="display:none;">
-    <h3>Selecciona categoría</h3>
-    <button onclick="iniciar('arit')">Aritmética</button>
-    <button onclick="iniciar('alg')">Álgebra</button>
-    <button onclick="iniciar('geo')">Geometría</button>
-    <button onclick="iniciar('comp')">Computación</button>
-    <button onclick="iniciar('eng')">Inglés</button>
+<div id="menu" style="display:none;">
+<button onclick="start('arit')">Aritmética</button>
+<button onclick="start('alg')">Álgebra</button>
+<button onclick="start('geo')">Geometría</button>
+<button onclick="start('comp')">Computación</button>
+<button onclick="start('eng')">Inglés</button>
 </div>
 
-<div id="quiz" class="card" style="display:none;">
-    <h3 id="pregunta"></h3>
-    <div id="opciones"></div>
+<div id="quiz" style="display:none;">
+<div class="progress"><div id="bar" class="progress-bar"></div></div>
+<h3 id="q"></h3>
+<div id="opts"></div>
 </div>
 
-<div id="resultado" class="card" style="display:none;">
-    <h2 id="final"></h2>
-    <button onclick="location.reload()">Reiniciar</button>
-</div>
+<div id="final" style="display:none;"></div>
 
 </div>
 
 <script>
 
-let preguntas=[], i=0, score=0, categoria="";
+let user="",score=0,i=0,qs=[];
 
-function menu(){
-    document.getElementById("inicio").style.display="none";
-    document.getElementById("menu").style.display="block";
+const banco={
+
+arit:[
+{texto:"8+5",correcta:"13",opciones:["13","12","14"]},
+{texto:"15-7",correcta:"8",opciones:["8","9","7"]},
+{texto:"6*4",correcta:"24",opciones:["24","20","26"]},
+{texto:"20/5",correcta:"4",opciones:["4","5","3"]},
+{texto:"9+6",correcta:"15",opciones:["15","14","16"]},
+{texto:"18-9",correcta:"9",opciones:["9","8","10"]},
+{texto:"7*3",correcta:"21",opciones:["21","20","24"]},
+{texto:"16/4",correcta:"4",opciones:["4","3","5"]},
+{texto:"12+11",correcta:"23",opciones:["23","22","24"]},
+{texto:"30-12",correcta:"18",opciones:["18","17","19"]},
+{texto:"5*9",correcta:"45",opciones:["45","40","50"]},
+{texto:"81/9",correcta:"9",opciones:["9","8","10"]},
+{texto:"14+7",correcta:"21",opciones:["21","20","22"]},
+{texto:"25-5",correcta:"20",opciones:["20","19","21"]},
+{texto:"8*8",correcta:"64",opciones:["64","60","66"]},
+{texto:"49/7",correcta:"7",opciones:["7","6","8"]},
+{texto:"11+13",correcta:"24",opciones:["24","23","25"]},
+{texto:"40-18",correcta:"22",opciones:["22","20","24"]},
+{texto:"9*6",correcta:"54",opciones:["54","56","50"]},
+{texto:"36/6",correcta:"6",opciones:["6","5","7"]},
+{texto:"17+3",correcta:"20",opciones:["20","19","21"]},
+{texto:"50-25",correcta:"25",opciones:["25","24","26"]},
+{texto:"4*7",correcta:"28",opciones:["28","27","30"]},
+{texto:"64/8",correcta:"8",opciones:["8","7","9"]},
+{texto:"19+2",correcta:"21",opciones:["21","20","22"]},
+{texto:"60-30",correcta:"30",opciones:["30","28","32"]},
+{texto:"3*11",correcta:"33",opciones:["33","30","36"]},
+{texto:"72/9",correcta:"8",opciones:["8","7","9"]},
+{texto:"10+10",correcta:"20",opciones:["20","19","21"]},
+{texto:"100-50",correcta:"50",opciones:["50","45","55"]}
+],
+
+alg:[
+{texto:"x+2=5",correcta:"3",opciones:["3","2","4"]},
+{texto:"x+4=9",correcta:"5",opciones:["5","4","6"]},
+{texto:"x+3=7",correcta:"4",opciones:["4","3","5"]},
+{texto:"x+5=12",correcta:"7",opciones:["7","6","8"]},
+{texto:"x+6=10",correcta:"4",opciones:["4","3","5"]},
+{texto:"x+7=15",correcta:"8",opciones:["8","7","9"]},
+{texto:"x+8=20",correcta:"12",opciones:["12","10","13"]},
+{texto:"x+9=25",correcta:"16",opciones:["16","15","17"]},
+{texto:"x+10=30",correcta:"20",opciones:["20","18","22"]},
+{texto:"x+1=4",correcta:"3",opciones:["3","2","5"]},
+{texto:"x+12=20",correcta:"8",opciones:["8","7","9"]},
+{texto:"x+13=18",correcta:"5",opciones:["5","4","6"]},
+{texto:"x+14=21",correcta:"7",opciones:["7","6","8"]},
+{texto:"x+15=25",correcta:"10",opciones:["10","9","11"]},
+{texto:"x+16=30",correcta:"14",opciones:["14","13","15"]},
+{texto:"x+17=40",correcta:"23",opciones:["23","22","24"]},
+{texto:"x+18=50",correcta:"32",opciones:["32","30","35"]},
+{texto:"x+19=60",correcta:"41",opciones:["41","40","42"]},
+{texto:"x+20=70",correcta:"50",opciones:["50","48","52"]},
+{texto:"x+11=15",correcta:"4",opciones:["4","3","5"]},
+{texto:"x+9=13",correcta:"4",opciones:["4","3","5"]},
+{texto:"x+6=14",correcta:"8",opciones:["8","7","9"]},
+{texto:"x+7=10",correcta:"3",opciones:["3","2","4"]},
+{texto:"x+8=12",correcta:"4",opciones:["4","3","5"]},
+{texto:"x+3=10",correcta:"7",opciones:["7","6","8"]},
+{texto:"x+4=11",correcta:"7",opciones:["7","6","8"]},
+{texto:"x+5=15",correcta:"10",opciones:["10","9","11"]},
+{texto:"x+2=8",correcta:"6",opciones:["6","5","7"]},
+{texto:"x+1=9",correcta:"8",opciones:["8","7","10"]},
+{texto:"x+10=18",correcta:"8",opciones:["8","7","9"]}
+],
+
+geo:[
+{texto:"¿Triángulo lados?",correcta:"3",opciones:["3","4","5"]},
+{texto:"¿Cuadrado lados?",correcta:"4",opciones:["4","3","5"]},
+{texto:"¿Pentágono lados?",correcta:"5",opciones:["5","6","4"]},
+{texto:"¿Hexágono lados?",correcta:"6",opciones:["6","5","7"]},
+{texto:"¿Heptágono lados?",correcta:"7",opciones:["7","6","8"]},
+{texto:"¿Octágono lados?",correcta:"8",opciones:["8","7","9"]},
+{texto:"¿Decágono lados?",correcta:"10",opciones:["10","9","11"]},
+{texto:"¿Eneágono lados?",correcta:"9",opciones:["9","8","10"]},
+{texto:"Ángulos triángulo",correcta:"180°",opciones:["180°","90°","360°"]},
+{texto:"Círculo lados",correcta:"0",opciones:["0","1","2"]},
+{texto:"4 lados iguales",correcta:"Cuadrado",opciones:["Cuadrado","Rectángulo","Trapecio"]},
+{texto:"Figura 3 lados",correcta:"Triángulo",opciones:["Triángulo","Cuadrado","Círculo"]},
+{texto:"Figura 5 lados",correcta:"Pentágono",opciones:["Pentágono","Hexágono","Cuadrado"]},
+{texto:"Figura 6 lados",correcta:"Hexágono",opciones:["Hexágono","Pentágono","Heptágono"]},
+{texto:"Figura 8 lados",correcta:"Octágono",opciones:["Octágono","Hexágono","Decágono"]},
+{texto:"Perímetro",correcta:"Suma lados",opciones:["Suma lados","Área","Volumen"]},
+{texto:"Área",correcta:"Superficie",opciones:["Superficie","Lados","Altura"]},
+{texto:"Radio",correcta:"Centro a borde",opciones:["Centro a borde","Diámetro","Altura"]},
+{texto:"Diámetro",correcta:"Doble radio",opciones:["Doble radio","Mitad","Perímetro"]},
+{texto:"Rectángulo lados",correcta:"4",opciones:["4","3","5"]},
+{texto:"Ángulo recto",correcta:"90°",opciones:["90°","45°","180°"]},
+{texto:"Ángulo agudo",correcta:"Menor a 90°",opciones:["Menor a 90°","Mayor a 90°","Igual a 90°"]},
+{texto:"Ángulo obtuso",correcta:"Mayor a 90°",opciones:["Mayor a 90°","Menor a 90°","Igual a 180°"]},
+{texto:"Vértice",correcta:"Esquina",opciones:["Esquina","Lado","Área"]},
+{texto:"Lado",correcta:"Segmento",opciones:["Segmento","Punto","Curva"]},
+{texto:"Diagonal",correcta:"Línea interna",opciones:["Línea interna","Lado","Radio"]},
+{texto:"Polígono",correcta:"Figura cerrada",opciones:["Figura cerrada","Línea abierta","Curva"]},
+{texto:"Circunferencia",correcta:"Perímetro círculo",opciones:["Perímetro círculo","Área","Radio"]},
+{texto:"Sin lados",correcta:"Círculo",opciones:["Círculo","Triángulo","Cuadrado"]},
+{texto:"Lados iguales + ángulos rectos",correcta:"Cuadrado",opciones:["Cuadrado","Rectángulo","Rombo"]}
+],
+
+comp:[
+{texto:"Python es",correcta:"Lenguaje",opciones:["Lenguaje","Hardware","Red"]},
+{texto:"CPU es",correcta:"Procesador",opciones:["Procesador","Memoria","Pantalla"]},
+{texto:"RAM es",correcta:"Memoria",opciones:["Memoria","Disco","Cable"]},
+{texto:"HTML es",correcta:"Lenguaje",opciones:["Lenguaje","Programa","Sistema"]},
+{texto:"SSD es",correcta:"Almacenamiento",opciones:["Almacenamiento","Entrada","Salida"]},
+{texto:"GPU es",correcta:"Gráficos",opciones:["Gráficos","Red","Audio"]},
+{texto:"Mouse es",correcta:"Entrada",opciones:["Entrada","Salida","Red"]},
+{texto:"Teclado es",correcta:"Entrada",opciones:["Entrada","Salida","Almacenamiento"]},
+{texto:"Monitor es",correcta:"Salida",opciones:["Salida","Entrada","Red"]},
+{texto:"USB es",correcta:"Conector",opciones:["Conector","Software","Sistema"]},
+{texto:"Internet es",correcta:"Red",opciones:["Red","Programa","Hardware"]},
+{texto:"Windows es",correcta:"Sistema operativo",opciones:["Sistema operativo","Hardware","Red"]},
+{texto:"Linux es",correcta:"Sistema operativo",opciones:["Sistema operativo","Lenguaje","Cable"]},
+{texto:"Java es",correcta:"Lenguaje",opciones:["Lenguaje","Hardware","Red"]},
+{texto:"Router hace",correcta:"Red",opciones:["Red","Imprimir","Guardar"]},
+{texto:"Hardware es",correcta:"Físico",opciones:["Físico","Digital","Virtual"]},
+{texto:"Software es",correcta:"Programas",opciones:["Programas","Cable","Pantalla"]},
+{texto:"Archivo es",correcta:"Datos",opciones:["Datos","Cable","Pantalla"]},
+{texto:"Base de datos",correcta:"Datos organizados",opciones:["Datos organizados","Imagen","Sonido"]},
+{texto:"Servidor es",correcta:"Servicio",opciones:["Servicio","Usuario","Pantalla"]},
+{texto:"Cliente es",correcta:"Usuario",opciones:["Usuario","Hardware","Red"]},
+{texto:"Nube es",correcta:"Internet",opciones:["Internet","Disco","Cable"]},
+{texto:"Firewall es",correcta:"Seguridad",opciones:["Seguridad","Audio","Video"]},
+{texto:"IP es",correcta:"Dirección",opciones:["Dirección","Cable","Imagen"]},
+{texto:"App es",correcta:"Aplicación",opciones:["Aplicación","Hardware","Red"]},
+{texto:"Código es",correcta:"Instrucciones",opciones:["Instrucciones","Imagen","Audio"]},
+{texto:"Bug es",correcta:"Error",opciones:["Error","Mejora","Programa"]},
+{texto:"Compilar es",correcta:"Convertir código",opciones:["Convertir código","Borrar","Ejecutar"]},
+{texto:"Red es",correcta:"Conexión",opciones:["Conexión","Archivo","Imagen"]},
+{texto:"Sistema operativo",correcta:"Controla el sistema",opciones:["Controla el sistema","Hardware","Red"]}
+],
+
+eng:[
+{texto:"Hello",correcta:"Hola",opciones:["Hola","Adiós","Gracias"]},
+{texto:"Bye",correcta:"Adiós",opciones:["Adiós","Hola","Gracias"]},
+{texto:"Thanks",correcta:"Gracias",opciones:["Gracias","Hola","Adiós"]},
+{texto:"Dog",correcta:"Perro",opciones:["Perro","Gato","Casa"]},
+{texto:"Cat",correcta:"Gato",opciones:["Gato","Perro","Mesa"]},
+{texto:"House",correcta:"Casa",opciones:["Casa","Escuela","Mesa"]},
+{texto:"Water",correcta:"Agua",opciones:["Agua","Fuego","Aire"]},
+{texto:"Food",correcta:"Comida",opciones:["Comida","Bebida","Agua"]},
+{texto:"Car",correcta:"Carro",opciones:["Carro","Avión","Barco"]},
+{texto:"Book",correcta:"Libro",opciones:["Libro","Cuaderno","Mesa"]},
+{texto:"Sun",correcta:"Sol",opciones:["Sol","Luna","Estrella"]},
+{texto:"Moon",correcta:"Luna",opciones:["Luna","Sol","Nube"]},
+{texto:"Teacher",correcta:"Maestro",opciones:["Maestro","Alumno","Doctor"]},
+{texto:"Student",correcta:"Estudiante",opciones:["Estudiante","Maestro","Amigo"]},
+{texto:"Friend",correcta:"Amigo",opciones:["Amigo","Enemigo","Vecino"]},
+{texto:"Mother",correcta:"Madre",opciones:["Madre","Padre","Hermano"]},
+{texto:"Father",correcta:"Padre",opciones:["Padre","Madre","Tío"]},
+{texto:"Brother",correcta:"Hermano",opciones:["Hermano","Hermana","Primo"]},
+{texto:"Sister",correcta:"Hermana",opciones:["Hermana","Hermano","Madre"]},
+{texto:"Table",correcta:"Mesa",opciones:["Mesa","Silla","Puerta"]},
+{texto:"Chair",correcta:"Silla",opciones:["Silla","Mesa","Ventana"]},
+{texto:"Window",correcta:"Ventana",opciones:["Ventana","Puerta","Piso"]},
+{texto:"Door",correcta:"Puerta",opciones:["Puerta","Ventana","Techo"]},
+{texto:"Phone",correcta:"Teléfono",opciones:["Teléfono","Computadora","Radio"]},
+{texto:"Computer",correcta:"Computadora",opciones:["Computadora","Televisión","Radio"]},
+{texto:"School",correcta:"Escuela",opciones:["Escuela","Casa","Calle"]},
+{texto:"City",correcta:"Ciudad",opciones:["Ciudad","Pueblo","País"]},
+{texto:"Country",correcta:"País",opciones:["País","Ciudad","Calle"]},
+{texto:"Day",correcta:"Día",opciones:["Día","Noche","Tarde"]},
+{texto:"Night",correcta:"Noche",opciones:["Noche","Día","Mañana"]}
+]
+
+};
+
+// ===== LOGICA =====
+
+function startUser(){
+user=document.getElementById("nombre").value;
+if(!user) return alert("Ingresa tu nombre");
+document.getElementById("inicio").style.display="none";
+document.getElementById("menu").style.display="block";
 }
 
-function iniciar(cat){
-    categoria=cat;
-    preguntas=[]; i=0; score=0;
-
-    generarPreguntas();
-
-    document.getElementById("menu").style.display="none";
-    document.getElementById("quiz").style.display="block";
-
-    mostrar();
+function start(cat){
+qs=[...banco[cat]];
+qs=qs.sort(()=>Math.random()-0.5);
+score=0;i=0;
+document.getElementById("menu").style.display="none";
+document.getElementById("quiz").style.display="block";
+next();
 }
 
-// =========================
-function generarPreguntas(){
-
-    // ===== ARITMÉTICA (100% únicas) =====
-    if(categoria=="arit"){
-        let usadas=new Set();
-
-        while(preguntas.length<30){
-            let tipo=["+","-","*","/"][rand(0,3)];
-            let a,b,r;
-
-            if(tipo=="+"){a=rand(1,100);b=rand(1,100);r=a+b;}
-            if(tipo=="-"){a=rand(50,150);b=rand(1,a);r=a-b;}
-            if(tipo=="*"){a=rand(2,15);b=rand(2,15);r=a*b;}
-            if(tipo=="/"){b=rand(2,12);r=rand(2,12);a=b*r;}
-
-            let texto=`${a} ${tipo} ${b}`;
-            if(usadas.has(texto)) continue;
-            usadas.add(texto);
-
-            preguntas.push({
-                texto,
-                opciones:shuffle([r,r+rand(1,10),r-rand(1,10)]),
-                correcta:r,
-                explicacion:"Operación básica"
-            });
-        }
-    }
-
-    // ===== ÁLGEBRA (100% únicas) =====
-    else if(categoria=="alg"){
-        let usadas=new Set();
-
-        while(preguntas.length<30){
-            let x=rand(1,50);
-            let b=rand(1,50);
-            let r=x+b;
-
-            let texto=`x + ${b} = ${r}`;
-            if(usadas.has(texto)) continue;
-            usadas.add(texto);
-
-            preguntas.push({
-                texto,
-                opciones:shuffle([x,x+rand(1,5),x-rand(1,5)]),
-                correcta:x,
-                explicacion:`x = ${r} - ${b}`
-            });
-        }
-    }
-
-    // ===== GEOMETRÍA (sin congelarse) =====
-    else if(categoria=="geo"){
-        let base=[
-            ["¿Lados de triángulo?","3","Un triángulo tiene 3 lados"],
-            ["¿Lados de cuadrado?","4","Un cuadrado tiene 4 lados"],
-            ["¿Lados de pentágono?","5","Pentágono = 5 lados"],
-            ["¿Lados de hexágono?","6","Hexágono = 6 lados"],
-            ["¿Lados de octágono?","8","Octágono = 8 lados"],
-            ["¿Lados de heptágono?","7","Heptágono = 7 lados"]
-        ];
-
-        for(let i=0;i<30;i++){
-            let p=base[i % base.length];
-
-            preguntas.push({
-                texto:p[0],
-                opciones:shuffle([p[1],"9","10"]),
-                correcta:p[1],
-                explicacion:p[2]
-            });
-        }
-    }
-
-    // ===== COMPUTACIÓN =====
-    else if(categoria=="comp"){
-        let base=[
-            ["Python es...","Lenguaje","Lenguaje de programación"],
-            ["CPU es...","Procesador","Unidad de procesamiento"],
-            ["RAM es...","Memoria","Memoria temporal"],
-            ["HTML es...","Lenguaje","Lenguaje de marcado"],
-            ["SSD es...","Almacenamiento","Disco rápido"],
-            ["GPU es...","Gráficos","Procesa gráficos"]
-        ];
-
-        for(let i=0;i<30;i++){
-            let p=base[i % base.length];
-
-            preguntas.push({
-                texto:p[0],
-                opciones:shuffle([p[1],"Internet","Pantalla"]),
-                correcta:p[1],
-                explicacion:p[2]
-            });
-        }
-    }
-
-    // ===== INGLÉS =====
-    else if(categoria=="eng"){
-        let base=[
-            ["Hello","Hola","Hello = Hola"],
-            ["Bye","Adiós","Bye = Adiós"],
-            ["Thanks","Gracias","Thanks = Gracias"],
-            ["Dog","Perro","Dog = Perro"],
-            ["House","Casa","House = Casa"],
-            ["Water","Agua","Water = Agua"]
-        ];
-
-        for(let i=0;i<30;i++){
-            let p=base[i % base.length];
-
-            preguntas.push({
-                texto:p[0],
-                opciones:shuffle([p[1],"Carro","Mesa"]),
-                correcta:p[1],
-                explicacion:p[2]
-            });
-        }
-    }
+function next(){
+let p=qs[i];
+document.getElementById("q").innerText=p.texto;
+let div=document.getElementById("opts");
+div.innerHTML="";
+p.opciones.sort(()=>Math.random()-0.5).forEach(o=>{
+let b=document.createElement("button");
+b.innerText=o;
+b.onclick=()=>check(o);
+div.appendChild(b);
+});
+document.getElementById("bar").style.width=(i/30*100)+"%";
 }
 
-// =========================
-function mostrar(){
-    let p=preguntas[i];
-    document.getElementById("pregunta").innerText=p.texto;
-
-    let div=document.getElementById("opciones");
-    div.innerHTML="";
-
-    p.opciones.forEach(op=>{
-        let btn=document.createElement("button");
-        btn.innerText=op;
-        btn.onclick=()=>verificar(op);
-        div.appendChild(btn);
-    });
+function check(op){
+let p=qs[i];
+if(op==p.correcta) score++;
+else alert("❌ Incorrecto");
+i++;
+if(i<qs.length) next();
+else finish();
 }
 
-// =========================
-function verificar(op){
-    let p=preguntas[i];
-
-    if(op==p.correcta){
-        score++;
-    }else{
-        alert("❌ "+p.explicacion);
-    }
-
-    i++;
-
-    if(i<preguntas.length) mostrar();
-    else finalizar();
-}
-
-// =========================
-function finalizar(){
-    document.getElementById("quiz").style.display="none";
-    document.getElementById("resultado").style.display="block";
-
-    let porcentaje=(score/preguntas.length)*100;
-    let estado=porcentaje>=90?"✅ APROBADO":"❌ REPROBADO";
-
-    document.getElementById("final").innerText=
-        `Puntaje: ${porcentaje.toFixed(1)}% - ${estado}`;
-}
-
-// =========================
-function rand(min,max){
-    return Math.floor(Math.random()*(max-min+1))+min;
-}
-
-function shuffle(arr){
-    return arr.sort(()=>Math.random()-0.5);
+function finish(){
+document.getElementById("quiz").style.display="none";
+document.getElementById("final").style.display="block";
+let pct=(score/30)*100;
+let estado=pct>=90?"🏆 APROBADO":"❌ REPROBADO";
+document.getElementById("final").innerHTML=
+`<h2>${user}</h2><p>${pct.toFixed(1)}%</p><p>${estado}</p>
+<button onclick="location.reload()">Reiniciar</button>`;
 }
 
 </script>
