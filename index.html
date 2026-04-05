@@ -11,9 +11,7 @@ body {
     color: white;
     text-align: center;
 }
-
 .container { margin-top: 40px; }
-
 .card {
     background: #2a2a40;
     padding: 20px;
@@ -21,7 +19,6 @@ body {
     display: inline-block;
     width: 350px;
 }
-
 button {
     padding: 10px;
     margin: 5px;
@@ -31,44 +28,36 @@ button {
     color: white;
     cursor: pointer;
 }
-
 button:hover { background: #45a049; }
-
-input {
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-}
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="container">
 
 <div id="inicio" class="card">
-    <h2>🎮 Quiz PRO</h2>
-    <input id="nombre" placeholder="Tu nombre"><br><br>
-    <button onclick="menu()">Continuar</button>
+<h2>🎮 Quiz PRO</h2>
+<button onclick="menu()">Continuar</button>
 </div>
 
 <div id="menu" class="card" style="display:none;">
-    <h3>Selecciona categoría</h3>
-    <button onclick="iniciar('arit')">Aritmética</button>
-    <button onclick="iniciar('alg')">Álgebra</button>
-    <button onclick="iniciar('geo')">Geometría</button>
-    <button onclick="iniciar('comp')">Computación</button>
-    <button onclick="iniciar('eng')">Inglés</button>
+<h3>Selecciona categoría</h3>
+<button onclick="iniciar('arit')">Aritmética</button>
+<button onclick="iniciar('alg')">Álgebra</button>
+<button onclick="iniciar('geo')">Geometría</button>
+<button onclick="iniciar('comp')">Computación</button>
+<button onclick="iniciar('eng')">Inglés</button>
 </div>
 
 <div id="quiz" class="card" style="display:none;">
-    <h3 id="pregunta"></h3>
-    <div id="opciones"></div>
+<h3 id="pregunta"></h3>
+<div id="opciones"></div>
 </div>
 
 <div id="resultado" class="card" style="display:none;">
-    <h2 id="final"></h2>
-    <button onclick="location.reload()">Reiniciar</button>
+<h2 id="final"></h2>
+<button onclick="location.reload()">Reiniciar</button>
 </div>
 
 </div>
@@ -77,13 +66,11 @@ input {
 
 let preguntas=[], i=0, score=0, categoria="";
 
-// =========================
 function menu(){
     document.getElementById("inicio").style.display="none";
     document.getElementById("menu").style.display="block";
 }
 
-// =========================
 function iniciar(cat){
     categoria=cat;
     preguntas=[]; i=0; score=0;
@@ -98,14 +85,11 @@ function iniciar(cat){
 
 // =========================
 function generarPreguntas(){
-    let usadas=new Set();
 
-    while(preguntas.length<30){
-
-        let texto, opciones, correcta, explicacion;
-
-        // ===== ARITMÉTICA =====
-        if(categoria=="arit"){
+    // ARITMÉTICA
+    if(categoria=="arit"){
+        let usadas=new Set();
+        while(preguntas.length<30){
             let tipo=["+","-","*","/"][rand(0,3)];
             let a,b,r;
 
@@ -114,59 +98,94 @@ function generarPreguntas(){
             if(tipo=="*"){a=rand(1,12);b=rand(1,12);r=a*b;}
             if(tipo=="/"){b=rand(1,10);r=rand(1,10);a=b*r;}
 
-            texto=`${a} ${tipo} ${b}`;
-            correcta=r;
-            explicacion="Operación básica";
+            let texto=`${a} ${tipo} ${b}`;
+            if(usadas.has(texto)) continue;
+            usadas.add(texto);
 
-            opciones=[
-                r,
-                r+rand(1,5),
-                r-rand(1,5)
-            ];
+            preguntas.push({
+                texto,
+                opciones:shuffle([r,r+1,r-1]),
+                correcta:r,
+                explicacion:"Operación básica"
+            });
         }
+    }
 
-        // ===== ÁLGEBRA =====
-        else if(categoria=="alg"){
+    // ÁLGEBRA
+    else if(categoria=="alg"){
+        let usadas=new Set();
+        while(preguntas.length<30){
             let x=rand(1,20), b=rand(1,20);
             let r=x+b;
 
-            texto=`x + ${b} = ${r}`;
-            correcta=x;
-            explicacion=`x = ${r} - ${b}`;
+            let texto=`x + ${b} = ${r}`;
+            if(usadas.has(texto)) continue;
+            usadas.add(texto);
 
-            opciones=[x, x+1, x-1];
+            preguntas.push({
+                texto,
+                opciones:shuffle([x,x+1,x-1]),
+                correcta:x,
+                explicacion:`x = ${r} - ${b}`
+            });
         }
+    }
 
-        // ===== GEOMETRÍA =====
-        else if(categoria=="geo"){
-            texto="¿Cuántos lados tiene un triángulo?";
-            correcta="3";
-            opciones=["3","4","5"];
-            explicacion="Un triángulo tiene 3 lados";
+    // GEOMETRÍA
+    else if(categoria=="geo"){
+        let base=[
+            ["Lados de triángulo","3","3","Un triángulo tiene 3 lados"],
+            ["Lados de cuadrado","4","4","Un cuadrado tiene 4 lados"],
+            ["Lados de pentágono","5","5","Pentágono = 5 lados"]
+        ];
+
+        while(preguntas.length<30){
+            let p=base[rand(0,base.length-1)];
+            preguntas.push({
+                texto:p[0],
+                opciones:shuffle([p[1],"6","7"]),
+                correcta:p[2],
+                explicacion:p[3]
+            });
         }
+    }
 
-        // ===== COMPUTACIÓN =====
-        else if(categoria=="comp"){
-            texto="¿Qué es Python?";
-            correcta="Lenguaje";
-            opciones=["Lenguaje","Hardware","Red"];
-            explicacion="Python es un lenguaje de programación";
+    // COMPUTACIÓN
+    else if(categoria=="comp"){
+        let base=[
+            ["Python es","Lenguaje","Lenguaje","Es lenguaje"],
+            ["CPU es","Procesador","Procesador","CPU procesa"],
+            ["RAM es","Memoria","Memoria","RAM = memoria"]
+        ];
+
+        while(preguntas.length<30){
+            let p=base[rand(0,base.length-1)];
+            preguntas.push({
+                texto:p[0],
+                opciones:shuffle([p[1],"Red","Pantalla"]),
+                correcta:p[2],
+                explicacion:p[3]
+            });
         }
+    }
 
-        // ===== INGLÉS =====
-        else if(categoria=="eng"){
-            texto="Hello significa:";
-            correcta="Hola";
-            opciones=["Hola","Adiós","Gracias"];
-            explicacion="Hello = Hola";
+    // INGLÉS
+    else if(categoria=="eng"){
+        let base=[
+            ["Hello","Hola","Hola","Hello = Hola"],
+            ["Bye","Adiós","Adiós","Bye = Adiós"],
+            ["Thanks","Gracias","Gracias","Thanks = Gracias"]
+        ];
+
+        while(preguntas.length<30){
+            let p=base[rand(0,base.length-1)];
+            preguntas.push({
+                texto:p[0],
+                opciones:shuffle([p[1],"Perro","Casa"]),
+                correcta:p[2],
+                explicacion:p[3]
+            });
         }
-
-        if(usadas.has(texto)) continue;
-        usadas.add(texto);
-
-        opciones = opciones.sort(()=>Math.random()-0.5);
-
-        preguntas.push({texto,opciones,correcta,explicacion});
     }
 }
 
@@ -186,7 +205,6 @@ function mostrar(){
     });
 }
 
-// =========================
 function verificar(op){
     let p=preguntas[i];
 
@@ -202,7 +220,6 @@ function verificar(op){
     else finalizar();
 }
 
-// =========================
 function finalizar(){
     document.getElementById("quiz").style.display="none";
     document.getElementById("resultado").style.display="block";
@@ -214,9 +231,12 @@ function finalizar(){
         `${porcentaje.toFixed(1)}% - ${estado}`;
 }
 
-// =========================
 function rand(min,max){
     return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function shuffle(arr){
+    return arr.sort(()=>Math.random()-0.5);
 }
 
 </script>
