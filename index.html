@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Interactivo</title>
+</head>
+<body>
+
+<h1>🎮 Quiz Interactivo</h1>
+
+<button onclick="iniciar()">Iniciar</button>
+
+<h2 id="pregunta"></h2>
+<div id="opciones"></div>
+
+<script>
+let preguntas = [];
+let i = 0;
+let score = 0;
+
+function iniciar() {
+    preguntas = [];
+    i = 0;
+    score = 0;
+
+    let usadas = new Set();
+
+    while (preguntas.length < 10) {
+        let a = Math.floor(Math.random()*10);
+        let b = Math.floor(Math.random()*10);
+        let texto = a + "+" + b;
+
+        if (usadas.has(texto)) continue;
+        usadas.add(texto);
+
+        let r = a + b;
+
+        let opciones = [r, r+1, r-1].sort(()=>Math.random()-0.5);
+
+        preguntas.push({texto, opciones, r});
+    }
+
+    mostrar();
+}
+
+function mostrar() {
+    let p = preguntas[i];
+    document.getElementById("pregunta").innerText = p.texto;
+
+    let div = document.getElementById("opciones");
+    div.innerHTML = "";
+
+    p.opciones.forEach(op=>{
+        let btn = document.createElement("button");
+        btn.innerText = op;
+        btn.onclick = ()=>verificar(op);
+        div.appendChild(btn);
+    });
+}
+
+function verificar(op) {
+    if (op == preguntas[i].r) score++;
+    i++;
+
+    if (i < preguntas.length) mostrar();
+    else alert("Puntaje: " + score);
+}
+</script>
+
+</body>
+</html>
